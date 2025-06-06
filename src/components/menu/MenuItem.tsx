@@ -20,14 +20,16 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
     
     // Show toast notification
     const toast = document.createElement('div');
-    toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-fade-in';
+    toast.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
     toast.textContent = 'Item adicionado ao carrinho!';
     document.body.appendChild(toast);
     
     setTimeout(() => {
       toast.classList.add('animate-fade-out');
       setTimeout(() => {
-        document.body.removeChild(toast);
+        if (document.body.contains(toast)) {
+          document.body.removeChild(toast);
+        }
       }, 300);
     }, 2000);
   };
@@ -43,15 +45,17 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
   };
   
   return (
-    <Card className="overflow-hidden flex flex-col h-full" padding="none">
+    <Card className="overflow-hidden flex flex-col h-full bg-white/80 backdrop-blur-md hover:bg-white/90 transition-all duration-300 transform hover:-translate-y-1" padding="none">
       <div
-        className="h-48 bg-center bg-cover"
+        className="h-48 bg-center bg-cover relative"
         style={{ backgroundImage: `url(${item.imageUrl})` }}
-      ></div>
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-10"></div>
+      </div>
       <div className="p-4 flex-grow">
-        <h3 className="text-xl font-bold text-gray-800">{item.name}</h3>
-        <p className="text-gray-600 mt-1 mb-2">{item.description}</p>
-        <p className="text-orange-600 font-bold text-xl">
+        <h3 className="text-xl font-bold text-gray-800 mb-2">{item.name}</h3>
+        <p className="text-gray-600 mb-3 line-clamp-2">{item.description}</p>
+        <p className="text-blue-600 font-bold text-xl">
           {formatCurrency(item.price)}
         </p>
       </div>
@@ -61,18 +65,18 @@ const MenuItem: React.FC<MenuItemProps> = ({ item }) => {
           <button
             onClick={decrementQuantity}
             disabled={quantity === 1}
-            className={`w-8 h-8 flex items-center justify-center rounded-full ${
+            className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors ${
               quantity === 1
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                : 'bg-orange-100 text-orange-600 hover:bg-orange-200'
+                : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
             }`}
           >
             <Minus size={16} />
           </button>
-          <span className="mx-3 font-medium">{quantity}</span>
+          <span className="mx-3 font-medium text-lg">{quantity}</span>
           <button
             onClick={incrementQuantity}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-orange-100 text-orange-600 hover:bg-orange-200"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
           >
             <Plus size={16} />
           </button>

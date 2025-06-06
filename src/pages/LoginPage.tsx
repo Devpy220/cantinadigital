@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { LogIn } from 'lucide-react';
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   
-  // Set page title
   useEffect(() => {
-    document.title = 'Login | Cantina Digital';
+    document.title = 'Login | EventHub';
     return () => {
-      document.title = 'Cantina Digital';
+      document.title = 'EventHub';
     };
   }, []);
   
-  // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin');
+      navigate('/dashboard');
     }
   }, [isAuthenticated, navigate]);
   
@@ -32,7 +30,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     setError('');
     
-    if (!username.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim()) {
       setError('Por favor, preencha todos os campos');
       return;
     }
@@ -40,12 +38,12 @@ const LoginPage: React.FC = () => {
     setLoading(true);
     
     try {
-      const user = await login(username, password);
+      const user = await login(email, password);
       
       if (!user) {
-        setError('Usuário ou senha inválidos');
+        setError('Email ou senha inválidos');
       } else {
-        navigate('/admin');
+        navigate('/dashboard');
       }
     } catch (err) {
       setError('Erro ao fazer login');
@@ -56,14 +54,14 @@ const LoginPage: React.FC = () => {
   
   return (
     <div className="max-w-md mx-auto">
-      <div className="bg-white rounded-lg shadow-md p-8">
+      <div className="bg-white/80 backdrop-blur-md rounded-xl shadow-lg p-8">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-orange-100 text-orange-600 mb-4">
-            <Lock size={32} />
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+            <LogIn size={32} />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Entrar</h1>
           <p className="text-gray-600 mt-1">
-            Acesse a área administrativa da Cantina Digital
+            Acesse sua conta para gerenciar seus eventos
           </p>
         </div>
         
@@ -75,10 +73,11 @@ const LoginPage: React.FC = () => {
         
         <form onSubmit={handleLogin}>
           <Input
-            label="Usuário"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Seu nome de usuário"
+            label="Email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
           />
           
           <Input
@@ -100,11 +99,12 @@ const LoginPage: React.FC = () => {
           </Button>
         </form>
         
-        <div className="mt-4 text-center text-sm text-gray-600">
-          <p>
-            Usuário padrão: <strong>admin</strong>
-            <br />
-            Senha padrão: <strong>admin123</strong>
+        <div className="mt-6 text-center">
+          <p className="text-gray-600">
+            Não tem uma conta?{' '}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-medium">
+              Criar conta
+            </Link>
           </p>
         </div>
       </div>

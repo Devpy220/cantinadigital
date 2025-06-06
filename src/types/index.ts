@@ -8,6 +8,7 @@ export interface MenuItem {
   imageUrl: string;
   category: string;
   available: boolean;
+  eventId: string;
 }
 
 export interface CartItem {
@@ -17,20 +18,37 @@ export interface CartItem {
 
 export interface User {
   id: string;
-  username: string;
-  password: string; // Note: In a real app, we would not store plain text passwords
-  isAdmin: boolean;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  createdAt: string;
+}
+
+export interface Event {
+  id: string;
+  name: string;
+  description: string;
+  date: string;
+  location: string;
+  imageUrl: string;
+  organizerId: string;
+  organizerName: string;
+  organizerPhone: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export interface Order {
   id: string;
+  eventId: string;
   items: CartItem[];
   totalAmount: number;
-  status: 'pending' | 'paid' | 'completed';
-  paymentMethod: 'pix' | 'credit' | 'debit';
+  status: 'pending' | 'confirmed' | 'completed';
   createdAt: string;
-  customerName?: string;
-  customerPhone?: string;
+  customerName: string;
+  customerPhone: string;
+  organizerPhone: string;
 }
 
 export type PaymentMethod = 'pix' | 'credit' | 'debit';

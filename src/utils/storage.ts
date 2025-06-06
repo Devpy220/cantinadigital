@@ -1,86 +1,18 @@
-// Utilities for local storage
+import { MenuItem, CartItem, User, Order, Event } from '../types';
+import { generateId } from './formatters';
 
-import { MenuItem, CartItem, User, Order } from '../types';
-
-// Initial sample data
-const sampleMenuItems: MenuItem[] = [
-  {
-    id: '1',
-    name: 'Pastel de Queijo',
-    description: 'Delicioso pastel recheado com queijo derretido',
-    price: 8.5,
-    imageUrl: 'https://images.pexels.com/photos/4553111/pexels-photo-4553111.jpeg',
-    category: 'food',
-    available: true,
-  },
-  {
-    id: '2',
-    name: 'Caldo de Mandioca',
-    description: 'Caldo quente de mandioca com carne e temperos',
-    price: 12.0,
-    imageUrl: 'https://images.pexels.com/photos/539451/pexels-photo-539451.jpeg',
-    category: 'food',
-    available: true,
-  },
-  {
-    id: '3',
-    name: 'Refrigerante',
-    description: 'Lata de refrigerante gelado',
-    price: 5.0,
-    imageUrl: 'https://images.pexels.com/photos/2983100/pexels-photo-2983100.jpeg',
-    category: 'drinks',
-    available: true,
-  },
-  {
-    id: '4',
-    name: 'Água',
-    description: 'Garrafa de água mineral',
-    price: 3.0,
-    imageUrl: 'https://images.pexels.com/photos/327090/pexels-photo-327090.jpeg',
-    category: 'drinks',
-    available: true,
-  },
-  {
-    id: '5',
-    name: 'Pé de Moleque',
-    description: 'Doce tradicional de amendoim',
-    price: 4.5,
-    imageUrl: 'https://images.pexels.com/photos/1028714/pexels-photo-1028714.jpeg',
-    category: 'desserts',
-    available: true,
-  },
-  {
-    id: '6',
-    name: 'Cachorro Quente',
-    description: 'Cachorro quente completo com molhos',
-    price: 10.0,
-    imageUrl: 'https://images.pexels.com/photos/3023479/pexels-photo-3023479.jpeg',
-    category: 'food',
-    available: true,
-  },
-];
-
-const sampleUsers: User[] = [
-  {
-    id: '1',
-    username: 'admin',
-    password: 'admin123',
-    isAdmin: true,
-  },
-];
-
-// Helper function to initialize local storage with sample data if empty
+// Helper function to initialize local storage
 export const initializeStorage = (): void => {
-  if (!localStorage.getItem('menuItems')) {
-    localStorage.setItem('menuItems', JSON.stringify(sampleMenuItems));
-  }
-  
   if (!localStorage.getItem('users')) {
-    localStorage.setItem('users', JSON.stringify(sampleUsers));
+    localStorage.setItem('users', JSON.stringify([]));
   }
   
-  if (!localStorage.getItem('cart')) {
-    localStorage.setItem('cart', JSON.stringify([]));
+  if (!localStorage.getItem('events')) {
+    localStorage.setItem('events', JSON.stringify([]));
+  }
+  
+  if (!localStorage.getItem('menuItems')) {
+    localStorage.setItem('menuItems', JSON.stringify([]));
   }
   
   if (!localStorage.getItem('orders')) {
@@ -92,77 +24,7 @@ export const initializeStorage = (): void => {
   }
 };
 
-// Menu Items CRUD
-export const getMenuItems = (): MenuItem[] => {
-  const items = localStorage.getItem('menuItems');
-  return items ? JSON.parse(items) : [];
-};
-
-export const addMenuItem = (item: MenuItem): void => {
-  const items = getMenuItems();
-  items.push(item);
-  localStorage.setItem('menuItems', JSON.stringify(items));
-};
-
-export const updateMenuItem = (updatedItem: MenuItem): void => {
-  const items = getMenuItems();
-  const index = items.findIndex((item) => item.id === updatedItem.id);
-  if (index !== -1) {
-    items[index] = updatedItem;
-    localStorage.setItem('menuItems', JSON.stringify(items));
-  }
-};
-
-export const deleteMenuItem = (id: string): void => {
-  const items = getMenuItems();
-  const filteredItems = items.filter((item) => item.id !== id);
-  localStorage.setItem('menuItems', JSON.stringify(filteredItems));
-};
-
-// Cart operations
-export const getCart = (): CartItem[] => {
-  const cart = localStorage.getItem('cart');
-  return cart ? JSON.parse(cart) : [];
-};
-
-export const addToCart = (item: MenuItem, quantity: number): void => {
-  const cart = getCart();
-  const existingItem = cart.find((cartItem) => cartItem.item.id === item.id);
-  
-  if (existingItem) {
-    existingItem.quantity += quantity;
-  } else {
-    cart.push({ item, quantity });
-  }
-  
-  localStorage.setItem('cart', JSON.stringify(cart));
-};
-
-export const updateCartItemQuantity = (itemId: string, quantity: number): void => {
-  const cart = getCart();
-  const index = cart.findIndex((cartItem) => cartItem.item.id === itemId);
-  
-  if (index !== -1) {
-    if (quantity <= 0) {
-      cart.splice(index, 1);
-    } else {
-      cart[index].quantity = quantity;
-    }
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }
-};
-
-export const removeFromCart = (itemId: string): void => {
-  const cart = getCart();
-  const filteredCart = cart.filter((cartItem) => cartItem.item.id !== itemId);
-  localStorage.setItem('cart', JSON.stringify(filteredCart));
-};
-
-export const clearCart = (): void => {
-  localStorage.setItem('cart', JSON.stringify([]));
-};
-
-// User authentication
+// User operations
 export const getUsers = (): User[] => {
   const users = localStorage.getItem('users');
   return users ? JSON.parse(users) : [];
@@ -173,11 +35,30 @@ export const getCurrentUser = (): User | null => {
   return user ? JSON.parse(user) : null;
 };
 
-export const login = (username: string, password: string): User | null => {
+export const register = (userData: Omit<User, 'id' | 'createdAt'>): User | null => {
   const users = getUsers();
-  const user = users.find(
-    (u) => u.username === username && u.password === password
-  );
+  
+  // Check if email already exists
+  if (users.find(u => u.email === userData.email)) {
+    return null;
+  }
+  
+  const newUser: User = {
+    ...userData,
+    id: generateId(),
+    createdAt: new Date().toISOString(),
+  };
+  
+  users.push(newUser);
+  localStorage.setItem('users', JSON.stringify(users));
+  localStorage.setItem('currentUser', JSON.stringify(newUser));
+  
+  return newUser;
+};
+
+export const login = (email: string, password: string): User | null => {
+  const users = getUsers();
+  const user = users.find(u => u.email === email && u.password === password);
   
   if (user) {
     localStorage.setItem('currentUser', JSON.stringify(user));
@@ -191,10 +72,89 @@ export const logout = (): void => {
   localStorage.setItem('currentUser', JSON.stringify(null));
 };
 
+// Event operations
+export const getEvents = (): Event[] => {
+  const events = localStorage.getItem('events');
+  return events ? JSON.parse(events) : [];
+};
+
+export const getEventById = (id: string): Event | null => {
+  const events = getEvents();
+  return events.find(event => event.id === id) || null;
+};
+
+export const getUserEvents = (userId: string): Event[] => {
+  const events = getEvents();
+  return events.filter(event => event.organizerId === userId);
+};
+
+export const addEvent = (event: Event): void => {
+  const events = getEvents();
+  events.push(event);
+  localStorage.setItem('events', JSON.stringify(events));
+};
+
+export const updateEvent = (updatedEvent: Event): void => {
+  const events = getEvents();
+  const index = events.findIndex(event => event.id === updatedEvent.id);
+  if (index !== -1) {
+    events[index] = updatedEvent;
+    localStorage.setItem('events', JSON.stringify(events));
+  }
+};
+
+export const deleteEvent = (id: string): void => {
+  const events = getEvents();
+  const filteredEvents = events.filter(event => event.id !== id);
+  localStorage.setItem('events', JSON.stringify(filteredEvents));
+  
+  // Also delete all menu items for this event
+  const menuItems = getMenuItems();
+  const filteredMenuItems = menuItems.filter(item => item.eventId !== id);
+  localStorage.setItem('menuItems', JSON.stringify(filteredMenuItems));
+};
+
+// Menu Items operations
+export const getMenuItems = (): MenuItem[] => {
+  const items = localStorage.getItem('menuItems');
+  return items ? JSON.parse(items) : [];
+};
+
+export const getMenuItemsByEvent = (eventId: string): MenuItem[] => {
+  const items = getMenuItems();
+  return items.filter(item => item.eventId === eventId);
+};
+
+export const addMenuItem = (item: MenuItem): void => {
+  const items = getMenuItems();
+  items.push(item);
+  localStorage.setItem('menuItems', JSON.stringify(items));
+};
+
+export const updateMenuItem = (updatedItem: MenuItem): void => {
+  const items = getMenuItems();
+  const index = items.findIndex(item => item.id === updatedItem.id);
+  if (index !== -1) {
+    items[index] = updatedItem;
+    localStorage.setItem('menuItems', JSON.stringify(items));
+  }
+};
+
+export const deleteMenuItem = (id: string): void => {
+  const items = getMenuItems();
+  const filteredItems = items.filter(item => item.id !== id);
+  localStorage.setItem('menuItems', JSON.stringify(filteredItems));
+};
+
 // Orders
 export const getOrders = (): Order[] => {
   const orders = localStorage.getItem('orders');
   return orders ? JSON.parse(orders) : [];
+};
+
+export const getOrdersByEvent = (eventId: string): Order[] => {
+  const orders = getOrders();
+  return orders.filter(order => order.eventId === eventId);
 };
 
 export const addOrder = (order: Order): void => {
@@ -205,7 +165,7 @@ export const addOrder = (order: Order): void => {
 
 export const updateOrderStatus = (orderId: string, status: Order['status']): void => {
   const orders = getOrders();
-  const index = orders.findIndex((order) => order.id === orderId);
+  const index = orders.findIndex(order => order.id === orderId);
   
   if (index !== -1) {
     orders[index].status = status;

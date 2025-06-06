@@ -18,14 +18,14 @@ const Button: React.FC<ButtonProps> = ({
   const baseClasses = 'font-medium rounded-lg transition-all duration-200 flex items-center justify-center';
   
   const variantClasses = {
-    primary: 'bg-orange-500 hover:bg-orange-600 text-white',
-    secondary: 'bg-green-600 hover:bg-green-700 text-white',
-    outline: 'border border-orange-500 text-orange-500 hover:bg-orange-50',
-    danger: 'bg-red-500 hover:bg-red-600 text-white',
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg',
+    secondary: 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg',
+    outline: 'border border-blue-600 text-blue-600 hover:bg-blue-50 bg-white/80 backdrop-blur-sm',
+    danger: 'bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg',
   };
   
   const sizeClasses = {
-    sm: 'text-sm py-1 px-3',
+    sm: 'text-sm py-2 px-3',
     md: 'text-base py-2 px-4',
     lg: 'text-lg py-3 px-6',
   };
